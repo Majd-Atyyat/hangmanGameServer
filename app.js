@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
+const auth = require("./auth");
 const dbConnect = require('./db/dbConnect');
 
 const User = require('./db/userModel');
@@ -99,7 +100,11 @@ app.post("/login", (request, response) => {
       });
   });
   
-
+// authentication endpoint
+app.get("/auth-endpoint", auth, (request, response) => {
+    response.json({ message: "You are authorized to access me" });
+  });
+  
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
