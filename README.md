@@ -1,10 +1,10 @@
 # hangmanGameServer  with mongoose
 
-//register endpoint
+### register endpoint
 https://hangman-serve-pwc-majd.onrender.com/register
 
-//login endpoint
+### login endpoint
 https://hangman-serve-pwc-majd.onrender.com/login
 
-// authentication endpoint
+### authentication endpoint
 https://hangman-serve-pwc-majd.onrender.com/auth-endpoint
