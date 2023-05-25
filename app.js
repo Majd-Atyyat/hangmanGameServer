@@ -3,8 +3,13 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const auth = require("./auth");
 const dbConnect = require('./db/dbConnect');
+const axios = require("axios");
 
-const User = require('./db/userModel');
+const User = require('./models/userModel');
+const Game = require('./models/gameModel');
+const gameRouter = require('./routes/game.js');
+const wordRouter = require('./routes/word.js');
+
 
 const app = express();
 const port = 5000;
@@ -27,7 +32,8 @@ app.use((req, res, next) => {
       "GET, POST, PUT, DELETE, PATCH, OPTIONS"
     );
     next();
-  });
+});
+
 // Register endpoint
 app.post('/register', async (request, response) => {
   try {
@@ -56,30 +62,25 @@ app.post('/register', async (request, response) => {
     });
   }
 });
-
 // login endpoint
 app.post("/login", (request, response) => {
-    // check if email exists
-    User.findOne({ email: request.body.email })
-  
-      // if email exists
-      .then((user) => {
-        // compare the password entered and the hashed password found
-        bcrypt
-          .compare(request.body.password, user.password)
-  
-          // if the passwords match
-          .then((passwordCheck) => {
-  
-            // check if password matches
-            if(!passwordCheck) {
-              return response.status(400).send({
-                message: "Passwords does not match",
-                error,
-              });
-            }
-  
-            //   create JWT token
+  const { email, password } = request.body;
+
+  // Check if email exists
+  User.findOne({ email })
+    .then((user) => {
+      // If email does not exist, return an error
+      if (!user) {
+        return response.status(404).send({
+          message: "Email not found",
+        });
+      }
+
+      // Compare the provided password with the stored hashed password
+      bcrypt.compare(password, user.password)
+        .then((isMatch) => {
+          // If passwords match, generate a JWT token and return success response
+          if (isMatch) {
             const token = jwt.sign(
               {
                 userId: user._id,
@@ -88,35 +89,55 @@ app.post("/login", (request, response) => {
               "RANDOM-TOKEN",
               { expiresIn: "24h" }
             );
-  
-            //   return success response
+
             response.status(200).send({
               message: "Login Successful",
               email: user.email,
               token,
             });
-          })
-          // catch error if password does not match
-          .catch((error) => {
+          } else {
+            // If passwords do not match, return an error
             response.status(400).send({
-              message: "Passwords does not match",
-              error,
+              message: "Passwords do not match",
             });
+          }
+        })
+        .catch((error) => {
+          response.status(500).send({
+            message: "Error comparing passwords",
+            error,
           });
-      })
-      // catch error if email does not exist
-      .catch((e) => {
-        response.status(404).send({
-          message: "Email not found",
-          e,
         });
+    })
+    .catch((error) => {
+      response.status(500).send({
+        message: "Error finding user",
+        error,
       });
-  });
-  
+    });
+});
+
 // authentication endpoint
 app.get("/auth-endpoint", auth, (request, response) => {
-    response.json({ message: "You are authorized to access me" });
-  });
+  response.json({ message: "You are authorized to access me" });
+});
+
+
+
+// Include the word router
+
+app.use('/word', wordRouter);
+
+// Include the game router
+
+app.use('/game', gameRouter);
+
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 
 // Start the server
 app.listen(port, () => {
