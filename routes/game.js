@@ -73,7 +73,7 @@ router.post('/game', auth, async (req, res) => {
   }
 });
 // Get game details
-router.get('/:id', async (req, res) => {
+router.get('/game/:id', async (req, res) => {
   try {
     const gameId = req.params.id;
 
@@ -91,7 +91,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update game with a guess
-router.put('/:id/guess', async (req, res) => {
+router.put('/game/:id/guess', async (req, res) => {
   try {
     const gameId = req.params.id;
     const { guess } = req.body;
