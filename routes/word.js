@@ -3,7 +3,7 @@ const axios = require('axios');
 const router = express.Router();
 
 
-router.get('/word', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
       const { length } = req.query;
   
