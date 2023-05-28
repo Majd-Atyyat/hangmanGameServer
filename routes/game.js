@@ -96,7 +96,6 @@ router.put('/:id/guess', async (req, res) => {
     const gameId = req.params.id;
     const { guess } = req.body;
 
-
     // Find the game by its ID
     const game = await Game.findById(gameId);
 
@@ -119,6 +118,10 @@ router.put('/:id/guess', async (req, res) => {
       game.remainingGuesses -= 1;
     }
 
+    // Update the guesses count
+    const totalGuesses = game.correctGuesses.length + game.incorrectGuesses.length;
+    game.guesses = totalGuesses;
+
     // Check if the game is won or lost
     if (game.correctGuesses.length === game.word.length) {
       game.status = 'won';
@@ -134,5 +137,6 @@ router.put('/:id/guess', async (req, res) => {
     res.status(500).json({ error: 'Failed to update game.' });
   }
 });
+
 
 module.exports = router;
