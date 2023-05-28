@@ -108,26 +108,35 @@ router.put('/:id/guess', async (req, res) => {
       return res.status(400).json({ error: 'Game is already over.' });
     }
 
-    // Update the game based on the guess
-    game.guesses.push(guess);
+  // Update the game based on the guess
+game.guesses.push(guess);
 
-    if (game.word.includes(guess)) {
-      game.correctGuesses.push(guess);
-    } else {
-      game.incorrectGuesses.push(guess);
-      game.remainingGuesses -= 1;
-    }
+const wordLetters = game.word.split('');
+let letterMatch = false;
 
-    // Update the guesses count
-    const totalGuesses = game.correctGuesses.length + game.incorrectGuesses.length;
-    game.guesses = totalGuesses;
+for (let i = 0; i < wordLetters.length; i++) {
+  if (wordLetters[i] === guess) {
+    game.correctGuesses.push(guess);
+    letterMatch = true;
+  }
+}
 
-    // Check if the game is won or lost
-    if (game.correctGuesses.length === game.word.length) {
-      game.status = 'won';
-    } else if (game.remainingGuesses === 0) {
-      game.status = 'lost';
-    }
+if (!letterMatch) {
+  if (!game.incorrectGuesses.includes(guess)) {
+    game.incorrectGuesses.push(guess);
+    game.remainingGuesses -= 1;
+  }
+}
+
+// Update the guesses count
+game.guesses = game.correctGuesses.length + game.incorrectGuesses.length;
+
+// Check if the game is won or lost
+if (game.correctGuesses.length === new Set(wordLetters).size) {
+  game.status = 'won';
+} else if (game.remainingGuesses === 0) {
+  game.status = 'lost';
+}
 
     // Save the updated game to the database
     await game.save();
