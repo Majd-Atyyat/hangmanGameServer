@@ -74,7 +74,8 @@ Example Request Body:
  "guess": "a"
 }
 
-## Dependencies
+```
+##  Dependencies
 
 - [Express](https://expressjs.com/) - Fast, unopinionated, minimalist web framework for Node.js.
 - [Bcrypt](https://www.npmjs.com/package/bcrypt) - Library for hashing passwords.
